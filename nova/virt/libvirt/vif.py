@@ -308,6 +308,14 @@ class LibvirtGenericVIFDriver(object):
 
         return conf
 
+    def get_config_vhostuser(self, instance, vif, image_meta,
+                             inst_type, virt_type):
+        conf = self.get_base_config(instance, vif, image_meta,
+                                    inst_type, virt_type)
+        designer.set_vif_host_backend_vhostuser_config(conf,
+            vif['vhostuser_mode'], vif['vhostuser_path'])
+        return conf
+
     def get_config(self, instance, vif, image_meta,
                    inst_type, virt_type):
         vif_type = vif['type']
@@ -495,6 +503,9 @@ class LibvirtGenericVIFDriver(object):
         except processutils.ProcessExecutionError:
             LOG.exception(_LE("Failed while plugging vif"), instance=instance)
 
+    def plug_vhostuser(self, instance, vif):
+        pass
+
     def plug(self, instance, vif):
         vif_type = vif['type']
 
@@ -638,6 +649,9 @@ class LibvirtGenericVIFDriver(object):
         except processutils.ProcessExecutionError:
             LOG.exception(_LE("Failed while unplugging vif"),
                           instance=instance)
+
+    def unplug_vhostuser(self, instance, vif):
+        pass
 
     def unplug(self, instance, vif):
         vif_type = vif['type']
