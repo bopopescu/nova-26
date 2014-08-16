@@ -1172,6 +1172,10 @@ class LibvirtConfigGuestTest(LibvirtConfigBaseTest):
         obj.cpu_shares = 100
         obj.cpu_quota = 50000
         obj.cpu_period = 25000
+
+        obj.membacking = config.LibvirtConfigGuestMemoryBacking()
+        obj.membacking.hugepages = True
+
         obj.name = "demo"
         obj.uuid = "b38a3f43-4be2-4046-897f-b67c2f5e0147"
         obj.os_type = "linux"
@@ -1198,6 +1202,9 @@ class LibvirtConfigGuestTest(LibvirtConfigBaseTest):
               <uuid>b38a3f43-4be2-4046-897f-b67c2f5e0147</uuid>
               <name>demo</name>
               <memory>104857600</memory>
+              <memoryBacking>
+                <hugepages/>
+              </memoryBacking>
               <vcpu cpuset="0-3,^2,4-5">2</vcpu>
               <sysinfo type='smbios'>
                  <bios>
@@ -1742,3 +1749,25 @@ class LibvirtConfigGuestWatchdogTest(LibvirtConfigBaseTest):
 
         xml = obj.to_xml()
         self.assertXmlEqual(xml, "<watchdog model='i6300esb' action='reset'/>")
+
+
+class LibvirtConfigGuestMemoryBackingTest(LibvirtConfigBaseTest):
+    def test_config_memory_backing_none(self):
+        obj = config.LibvirtConfigGuestMemoryBacking()
+
+        xml = obj.to_xml()
+        self.assertXmlEqual(xml, "<memoryBacking/>")
+
+    def test_config_memory_backing_all(self):
+        obj = config.LibvirtConfigGuestMemoryBacking()
+        obj.locked = True
+        obj.sharedpages = False
+        obj.hugepages = True
+
+        xml = obj.to_xml()
+        self.assertXmlEqual(xml, """
+          <memoryBacking>
+            <hugepages/>
+            <nosharedpages/>
+            <locked/>
+          </memoryBacking>""")
