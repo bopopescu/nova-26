@@ -340,6 +340,14 @@ class LibvirtGenericVIFDriver(LibvirtBaseVIFDriver):
 
         return conf
 
+    def get_config_vhostuser(self, instance, vif, image_meta, inst_type):
+        conf = super(LibvirtGenericVIFDriver,
+                     self).get_config(instance, vif,
+                                      image_meta, inst_type)
+        designer.set_vif_host_backend_vhostuser_config(conf,
+            vif['vhostuser_mode'], vif['vhostuser_path'])
+        return conf
+
     def get_config(self, instance, vif, image_meta, inst_type):
         vif_type = vif['type']
 
@@ -392,6 +400,11 @@ class LibvirtGenericVIFDriver(LibvirtBaseVIFDriver):
                                            vif,
                                            image_meta,
                                            inst_type)
+        elif vif_type == network_model.VIF_TYPE_VHOSTUSER:
+            return self.get_config_vhostuser(instance,
+                                             vif,
+                                             image_meta,
+                                             inst_type)
         else:
             raise exception.NovaException(
                 _("Unexpected vif_type=%s") % vif_type)
@@ -596,6 +609,9 @@ class LibvirtGenericVIFDriver(LibvirtBaseVIFDriver):
         except processutils.ProcessExecutionError:
             LOG.exception(_("Failed while plugging vif"), instance=instance)
 
+    def plug_vhostuser(self, instance, vif):
+        pass
+
     def plug(self, instance, vif):
         vif_type = vif['type']
 
@@ -777,6 +793,9 @@ class LibvirtGenericVIFDriver(LibvirtBaseVIFDriver):
             linux_net.delete_net_dev(dev)
         except processutils.ProcessExecutionError:
             LOG.exception(_("Failed while unplugging vif"), instance=instance)
+
+    def unplug_vhostuser(self, instance, vif):
+        pass
 
     def unplug(self, instance, vif):
         vif_type = vif['type']

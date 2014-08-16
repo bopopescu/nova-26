@@ -201,6 +201,20 @@ class LibvirtVifTestCase(test.TestCase):
                                     type=network_model.VIF_TYPE_MIDONET,
                                     devname='tap-xxx-yyy-zzz')
 
+    vif_vhostuser_defpath = network_model.VIF(id='vif-xxx-yyy-zzz',
+                                              address='ca:fe:de:ad:be:ef',
+                                              type=network_model.
+                                                      VIF_TYPE_VHOSTUSER,
+                                              vhostuser_mode='server')
+
+    vif_vhostuser_custpath = network_model.VIF(id='vif-xxx-yyy-zzz',
+                                               address='ca:fe:de:ad:be:ef',
+                                               type=network_model.
+                                                       VIF_TYPE_VHOSTUSER,
+                                               vhostuser_path=
+                                                       '/tmp/custompath.sock',
+                                               vhostuser_mode='server')
+
     vif_iovisor = network_model.VIF(id='vif-xxx-yyy-zzz',
                                    address='ca:fe:de:ad:be:ef',
                                    network=network_bridge,
@@ -771,6 +785,32 @@ class LibvirtVifTestCase(test.TestCase):
         node = self._get_node(xml)
         self._assertTypeAndMacEquals(node, "ethernet", "target", "dev",
                                      self.vif_midonet, br_want)
+
+    def test_vhostuser_defpath_vif_driver(self):
+        d = vif.LibvirtGenericVIFDriver(self._get_conn())
+        xml = self._get_instance_xml(d, self.vif_vhostuser_defpath)
+        node = self._get_node(xml)
+        self._assertTypeEquals(node, "vhostuser", "source", "type",
+                               "unix")
+        self._assertTypeEquals(node, "vhostuser", "source", "path",
+                               "/var/lib/libvirt/qemu/vhostuser")
+        self._assertTypeEquals(node, "vhostuser", "source", "mode",
+                               "server")
+        self._assertMacEquals(node, self.vif_vhostuser_defpath)
+        self._assertModel(xml, network_model.VIF_MODEL_VIRTIO)
+
+    def test_vhostuser_custpath_vif_driver(self):
+        d = vif.LibvirtGenericVIFDriver(self._get_conn())
+        xml = self._get_instance_xml(d, self.vif_vhostuser_custpath)
+        node = self._get_node(xml)
+        self._assertTypeEquals(node, "vhostuser", "source", "type",
+                               "unix")
+        self._assertTypeEquals(node, "vhostuser", "source", "path",
+                               "/tmp/custompath.sock")
+        self._assertTypeEquals(node, "vhostuser", "source", "mode",
+                               "server")
+        self._assertMacEquals(node, self.vif_vhostuser_custpath)
+        self._assertModel(xml, network_model.VIF_MODEL_VIRTIO)
 
     def test_generic_8021qbh_driver(self):
         d = vif.LibvirtGenericVIFDriver(self._get_conn())
