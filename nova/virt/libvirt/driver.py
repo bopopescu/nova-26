@@ -3136,7 +3136,11 @@ class LibvirtDriver(driver.ComputeDriver):
         for key, value in flavor.extra_specs.iteritems():
             scope = key.split(':')
             if len(scope) > 1 and scope[0] == 'quota':
-                if scope[1] in quota_items:
+                if scope[1] == 'mem_hugepages':
+                    guest.membacking = \
+                        vconfig.LibvirtConfigGuestMemoryBacking()
+                    guest.membacking.hugepages = value
+                elif scope[1] in quota_items:
                     setattr(guest, scope[1], value)
 
         guest.cpu = self.get_guest_cpu_config()
