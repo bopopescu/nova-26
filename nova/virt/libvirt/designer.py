@@ -56,6 +56,27 @@ def set_vif_host_backend_ethernet_config(conf, tapname):
     conf.script = ""
 
 
+def set_vif_host_backend_vhostuser_config(conf, path, port_id, mode):
+    """Populate a LibvirtConfigGuestInterface instance
+    with vhostuser socket details
+    """
+
+    conf.net_type = "vhostuser"
+    # unix is the only supported type in libvirt
+    conf.vhostuser_type = "unix"
+    if path:
+        conf.vhostuser_path = path
+    else:
+        conf.vhostuser_path = "/var/lib/libvirt/qemu/vhostuser"
+    conf.vhostuser_path += "/" + port_id + ".socket"
+
+    # the default mode is server
+    if mode:
+        conf.vhostuser_mode = mode
+    else:
+        conf.vhostuser_mode = "server"
+
+
 def set_vif_host_backend_ovs_config(conf, brname, interfaceid, tapname=None):
     """Populate a LibvirtConfigGuestInterface instance
     with host backend details for an OpenVSwitch bridge.
